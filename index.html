@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Finder - Умный поиск фильмов</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎬 Movie Finder</h1>
+            <p>Поиск фильмов через OMDb API</p>
+        </header>
+
+        <main>
+            <div class="search-section">
+                <div class="search-container">
+                    <input 
+                        type="text" 
+                        id="search-input" 
+                        placeholder="Введите название фильма..."
+                        autocomplete="off"
+                    >
+                    <span class="search-icon">🔍</span>
+                </div>
+                
+                <div class="filters">
+                    <select id="year-filter">
+                        <option value="">Все годы</option>
+                        <!-- Годы будут добавлены через JS -->
+                    </select>
+                    
+                    <select id="type-filter">
+                        <option value="">Все типы</option>
+                        <option value="movie">Фильмы</option>
+                        <option value="series">Сериалы</option>
+                        <option value="episode">Эпизоды</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="favorites-section">
+                <button id="toggle-favorites" class="favorites-btn">
+                    ⭐ Избранное (<span id="favorites-count">0</span>)
+                </button>
+            </div>
+
+            <!-- Состояния загрузки и ошибок -->
+            <div id="loading" class="loading hidden">
+                <div class="spinner"></div>
+                <p>Загрузка фильмов...</p>
+            </div>
+
+            <div id="error-message" class="error hidden">
+                <p>⚠️ Произошла ошибка. Пожалуйста, попробуйте позже.</p>
+            </div>
+
+            <div id="no-results" class="no-results hidden">
+                <p>😕 Фильмы не найдены. Попробуйте изменить запрос.</p>
+            </div>
+
+            <!-- Сетка с фильмами -->
+            <div id="movies-grid" class="movies-grid">
+                <!-- Скелетоны загрузки будут добавлены через JS -->
+            </div>
+
+            <!-- Индикатор загрузки для бесконечного скролла -->
+            <div id="infinite-scroll-loader" class="infinite-loader hidden">
+                <div class="spinner small"></div>
+                <p>Загрузка дополнительных фильмов...</p>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
