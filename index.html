@@ -5,70 +5,392 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Movie Finder - Умный поиск фильмов</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🎬 Movie Finder</h1>
-            <p>Поиск фильмов через OMDb API</p>
-        </header>
+    <div class="app-container">
+        <!-- Боковое меню -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>🎬 Movie Finder</h2>
+                <button class="close-sidebar" id="closeSidebar"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-page="search">
+                    <i class="fas fa-search"></i>
+                    <span>Поиск фильмов</span>
+                </a>
+                <a href="#" class="nav-item" data-page="favorites">
+                    <i class="fas fa-heart"></i>
+                    <span>Избранное</span>
+                    <span class="badge" id="sidebar-favorites-count">0</span>
+                </a>
+                <a href="#" class="nav-item" data-page="watchlist">
+                    <i class="fas fa-clock"></i>
+                    <span>К просмотру</span>
+                    <span class="badge" id="sidebar-watchlist-count">0</span>
+                </a>
+                <a href="#" class="nav-item" data-page="history">
+                    <i class="fas fa-history"></i>
+                    <span>История</span>
+                </a>
+                <a href="#" class="nav-item" data-page="stats">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Статистика</span>
+                </a>
+                <a href="#" class="nav-item" data-page="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Настройки</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Гость</span>
+                </div>
+            </div>
+        </aside>
 
-        <main>
-            <div class="search-section">
-                <div class="search-container">
+        <!-- Основной контент -->
+        <main class="main-content" id="mainContent">
+            <!-- Верхняя панель -->
+            <header class="top-bar">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                
+                <div class="search-bar">
+                    <i class="fas fa-search search-icon"></i>
                     <input 
                         type="text" 
-                        id="search-input" 
-                        placeholder="Введите название фильма..."
+                        id="globalSearch" 
+                        placeholder="Поиск фильмов, актеров, режиссеров..."
                         autocomplete="off"
                     >
-                    <span class="search-icon">🔍</span>
                 </div>
                 
-                <div class="filters">
-                    <select id="year-filter">
-                        <option value="">Все годы</option>
-                        <!-- Годы будут добавлены через JS -->
-                    </select>
+                <div class="top-bar-actions">
+                    <button class="theme-toggle" id="themeToggle">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <div class="user-menu">
+                        <img src="https://via.placeholder.com/40" alt="User" class="user-avatar">
+                    </div>
+                </div>
+            </header>
+
+            <!-- Динамический контент страниц -->
+            <div class="page-container" id="pageContainer">
+                <!-- Страница поиска (по умолчанию) -->
+                <div class="page active" id="page-search">
+                    <div class="page-header">
+                        <h1>Поиск фильмов</h1>
+                        <div class="header-actions">
+                            <button class="btn-filter" id="toggleFilters">
+                                <i class="fas fa-filter"></i>
+                                Фильтры
+                            </button>
+                            <div class="view-options">
+                                <button class="view-btn active" data-view="grid">
+                                    <i class="fas fa-th-large"></i>
+                                </button>
+                                <button class="view-btn" data-view="list">
+                                    <i class="fas fa-list"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Панель фильтров -->
+                    <div class="filters-panel" id="filtersPanel">
+                        <div class="filters-grid">
+                            <div class="filter-group">
+                                <label>Год выпуска</label>
+                                <div class="year-range">
+                                    <input type="number" id="yearFrom" placeholder="От" min="1900" max="2026">
+                                    <input type="number" id="yearTo" placeholder="До" min="1900" max="2026">
+                                </div>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label>Рейтинг IMDb</label>
+                                <select id="ratingFilter">
+                                    <option value="">Любой</option>
+                                    <option value="9">9+</option>
+                                    <option value="8">8+</option>
+                                    <option value="7">7+</option>
+                                    <option value="6">6+</option>
+                                    <option value="5">5+</option>
+                                </select>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label>Жанр</label>
+                                <select id="genreFilter">
+                                    <option value="">Все жанры</option>
+                                    <option value="Action">Боевик</option>
+                                    <option value="Comedy">Комедия</option>
+                                    <option value="Drama">Драма</option>
+                                    <option value="Horror">Ужасы</option>
+                                    <option value="Sci-Fi">Фантастика</option>
+                                    <option value="Romance">Мелодрама</option>
+                                </select>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label>Страна</label>
+                                <select id="countryFilter">
+                                    <option value="">Все страны</option>
+                                    <option value="USA">США</option>
+                                    <option value="UK">Великобритания</option>
+                                    <option value="France">Франция</option>
+                                    <option value="Germany">Германия</option>
+                                    <option value="Japan">Япония</option>
+                                    <option value="Russia">Россия</option>
+                                </select>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label>Тип</label>
+                                <select id="typeFilter">
+                                    <option value="">Все</option>
+                                    <option value="movie">Фильмы</option>
+                                    <option value="series">Сериалы</option>
+                                    <option value="episode">Эпизоды</option>
+                                </select>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label>Сортировка</label>
+                                <select id="sortFilter">
+                                    <option value="default">По умолчанию</option>
+                                    <option value="year_desc">Год (новые)</option>
+                                    <option value="year_asc">Год (старые)</option>
+                                    <option value="rating_desc">Рейтинг (высокий)</option>
+                                    <option value="rating_asc">Рейтинг (низкий)</option>
+                                    <option value="title_asc">Название (А-Я)</option>
+                                    <option value="title_desc">Название (Я-А)</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="filters-actions">
+                            <button class="btn-primary" id="applyFilters">Применить</button>
+                            <button class="btn-secondary" id="resetFilters">Сбросить</button>
+                        </div>
+                    </div>
+
+                    <!-- Результаты поиска -->
+                    <div class="results-header">
+                        <p class="results-count" id="resultsCount">Найдено: 0 фильмов</p>
+                        <div class="results-tabs">
+                            <button class="tab-btn active" data-tab="all">Все</button>
+                            <button class="tab-btn" data-tab="movies">Фильмы</button>
+                            <button class="tab-btn" data-tab="series">Сериалы</button>
+                        </div>
+                    </div>
+
+                    <!-- Сетка фильмов -->
+                    <div class="movies-grid" id="moviesGrid">
+                        <!-- Фильмы будут загружаться сюда -->
+                    </div>
+
+                    <!-- Состояния загрузки -->
+                    <div class="loading-state" id="loadingState">
+                        <div class="spinner"></div>
+                        <p>Загрузка фильмов...</p>
+                    </div>
+
+                    <div class="error-state" id="errorState">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <p>Произошла ошибка при загрузке</p>
+                        <button class="btn-retry" onclick="retryLoad()">Повторить</button>
+                    </div>
+
+                    <div class="empty-state" id="emptyState">
+                        <i class="fas fa-film"></i>
+                        <p>Фильмы не найдены</p>
+                        <p class="hint">Попробуйте изменить параметры поиска</p>
+                    </div>
+
+                    <!-- Бесконечный скролл индикатор -->
+                    <div class="infinite-scroll-trigger" id="infiniteScrollTrigger">
+                        <div class="infinite-loader">
+                            <div class="spinner small"></div>
+                            <span>Загрузка дополнительных фильмов...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Страница избранного -->
+                <div class="page" id="page-favorites">
+                    <div class="page-header">
+                        <h1>Избранное</h1>
+                        <button class="btn-clear" id="clearFavorites">
+                            <i class="fas fa-trash"></i>
+                            Очистить
+                        </button>
+                    </div>
+                    <div class="movies-grid" id="favoritesGrid"></div>
+                </div>
+
+                <!-- Страница списка просмотра -->
+                <div class="page" id="page-watchlist">
+                    <div class="page-header">
+                        <h1>К просмотру</h1>
+                        <button class="btn-clear" id="clearWatchlist">
+                            <i class="fas fa-trash"></i>
+                            Очистить
+                        </button>
+                    </div>
+                    <div class="watchlist-categories">
+                        <button class="category-btn active" data-category="all">Все</button>
+                        <button class="category-btn" data-category="movies">Фильмы</button>
+                        <button class="category-btn" data-category="series">Сериалы</button>
+                        <button class="category-btn" data-category="watched">Просмотрено</button>
+                    </div>
+                    <div class="movies-grid" id="watchlistGrid"></div>
+                </div>
+
+                <!-- Страница истории -->
+                <div class="page" id="page-history">
+                    <div class="page-header">
+                        <h1>История поиска</h1>
+                        <button class="btn-clear" id="clearHistory">
+                            <i class="fas fa-trash"></i>
+                            Очистить историю
+                        </button>
+                    </div>
+                    <div class="history-list" id="historyList"></div>
+                </div>
+
+                <!-- Страница статистики -->
+                <div class="page" id="page-stats">
+                    <div class="page-header">
+                        <h1>Моя статистика</h1>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <i class="fas fa-heart"></i>
+                            <div class="stat-info">
+                                <span class="stat-value" id="statFavorites">0</span>
+                                <span class="stat-label">В избранном</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-clock"></i>
+                            <div class="stat-info">
+                                <span class="stat-value" id="statWatchlist">0</span>
+                                <span class="stat-label">К просмотру</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-star"></i>
+                            <div class="stat-info">
+                                <span class="stat-value" id="statRated">0</span>
+                                <span class="stat-label">Оценено</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-search"></i>
+                            <div class="stat-info">
+                                <span class="stat-value" id="statSearches">0</span>
+                                <span class="stat-label">Поисков</span>
+                            </div>
+                        </div>
+                    </div>
                     
-                    <select id="type-filter">
-                        <option value="">Все типы</option>
-                        <option value="movie">Фильмы</option>
-                        <option value="series">Сериалы</option>
-                        <option value="episode">Эпизоды</option>
-                    </select>
+                    <div class="charts-section">
+                        <h2>Любимые жанры</h2>
+                        <div class="genre-chart" id="genreChart"></div>
+                    </div>
+                    
+                    <div class="charts-section">
+                        <h2>Активность</h2>
+                        <div class="activity-calendar" id="activityCalendar"></div>
+                    </div>
+                </div>
+
+                <!-- Страница настроек -->
+                <div class="page" id="page-settings">
+                    <div class="page-header">
+                        <h1>Настройки</h1>
+                    </div>
+                    
+                    <div class="settings-section">
+                        <h3>Внешний вид</h3>
+                        <div class="setting-item">
+                            <label>Тема оформления</label>
+                            <select id="themeSetting">
+                                <option value="light">Светлая</option>
+                                <option value="dark">Темная</option>
+                                <option value="system">Системная</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <label>Размер карточек</label>
+                            <select id="cardSizeSetting">
+                                <option value="small">Маленькие</option>
+                                <option value="medium" selected>Средние</option>
+                                <option value="large">Большие</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-section">
+                        <h3>Поиск</h3>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" id="saveHistorySetting" checked>
+                                Сохранять историю поиска
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" id="autoplayTrailers">
+                                Автоматически показывать трейлеры
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-section">
+                        <h3>Уведомления</h3>
+                        <div class="setting-item">
+                            <label>
+                                <input type="checkbox" id="notifyNewMovies">
+                                Уведомлять о новых фильмах
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-actions">
+                        <button class="btn-primary" id="saveSettings">Сохранить настройки</button>
+                        <button class="btn-secondary" id="resetSettings">Сбросить</button>
+                    </div>
                 </div>
             </div>
 
-            <div class="favorites-section">
-                <button id="toggle-favorites" class="favorites-btn">
-                    ⭐ Избранное (<span id="favorites-count">0</span>)
-                </button>
+            <!-- Модальное окно с деталями фильма -->
+            <div class="modal" id="movieModal">
+                <div class="modal-content">
+                    <button class="modal-close"><i class="fas fa-times"></i></button>
+                    <div class="modal-body" id="movieDetails"></div>
+                </div>
             </div>
 
-            <!-- Состояния загрузки и ошибок -->
-            <div id="loading" class="loading hidden">
-                <div class="spinner"></div>
-                <p>Загрузка фильмов...</p>
-            </div>
-
-            <div id="error-message" class="error hidden">
-                <p>⚠️ Произошла ошибка. Пожалуйста, попробуйте позже.</p>
-            </div>
-
-            <div id="no-results" class="no-results hidden">
-                <p>😕 Фильмы не найдены. Попробуйте изменить запрос.</p>
-            </div>
-
-            <!-- Сетка с фильмами -->
-            <div id="movies-grid" class="movies-grid">
-                <!-- Скелетоны загрузки будут добавлены через JS -->
-            </div>
-
-            <!-- Индикатор загрузки для бесконечного скролла -->
-            <div id="infinite-scroll-loader" class="infinite-loader hidden">
-                <div class="spinner small"></div>
-                <p>Загрузка дополнительных фильмов...</p>
+            <!-- Панель быстрого сравнения -->
+            <div class="compare-panel" id="comparePanel">
+                <div class="compare-header">
+                    <h3>Сравнение фильмов</h3>
+                    <button class="close-compare"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="compare-items" id="compareItems"></div>
+                <div class="compare-actions">
+                    <button class="btn-primary" id="compareBtn" disabled>Сравнить</button>
+                    <button class="btn-secondary" id="clearCompare">Очистить</button>
+                </div>
             </div>
         </main>
     </div>
